@@ -15,7 +15,7 @@ from PIL import Image
 from io import BytesIO
 from transformers import TextStreamer
 
-
+tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/llavamodel", load_4bit=True)
 def load_image(image_file):
     if image_file.startswith('http') or image_file.startswith('https'):
         response = requests.get(image_file)
@@ -29,9 +29,8 @@ def main(args):
     # Model
     disable_torch_init()
 
-    model_name = get_model_name_from_path(args.model_path)
-    tokenizer, model, image_processor, context_len = load_pretrained_model(args.model_path, args.model_base, model_name, args.load_8bit, args.load_4bit)
-
+    #model_name = get_model_name_from_path(args.model_path)
+    
     if 'llama-2' in model_name.lower():
         conv_mode = "llava_llama_2"
     elif "v1" in model_name.lower():
@@ -54,37 +53,34 @@ def main(args):
 
     image = load_image(args.image_file)
     image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'].half().cuda()
+    inp = args.query
+    print(f"{roles[0]}: {inp}")
     print(f"{roles[1]}: ", end="")
-
-    #if image is not None:
-            # first message
-    #if model.config.mm_use_im_start_end:
     inp = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + inp
-        #else:
-    #inp = DEFAULT_IMAGE_TOKEN + '\n' + inp
-            #image = None
     prompt = f"{roles[0]} + {inp} + {roles[1]}"
-        input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
-        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-        keywords = [stop_str]
-        stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
-        streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-        generation_kwargs = dict(**inputs, streamer=streamer, max_new_tokens=200, temperature = 0.1,top_k = 20,top_p = 0.4,do_sample=True, repetition_penalty=1.2)
-        thread = Thread(target=model.generate, kwargs=generation_kwargs)
-        thread.start()
-        generated_text = ""
-        for new_text in streamer:
-            generate += new_text
-            yield generate
+    input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+    stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
+    keywords = [stop_str]
+    stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
+    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+    generation_kwargs = dict(**inputs, streamer=streamer, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2)
+    thread = Thread(target=model.generate, kwargs=generation_kwargs)
+    thread.start()
+    generated_text = ""
+    for new_text in streamer:
+        generate += new_text
+        yield generate
 
-        if args.debug:
-            print("\n", {"prompt": prompt, "outputs": outputs}, "\n")
+    if args.debug:
+        print("\n", {"prompt": prompt, "outputs": outputs}, "\n")
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
     parser.add_argument("--model-base", type=str, default=None)
+    parser.add_argument("--query", type=str, default="Hello")
     parser.add_argument("--image-file", type=str, required=True)
     parser.add_argument("--num-gpus", type=int, default=1)
     parser.add_argument("--conv-mode", type=str, default=None)
