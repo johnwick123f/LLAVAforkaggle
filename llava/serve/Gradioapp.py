@@ -70,7 +70,7 @@ def main(args):
     generated_text = ""
     for new_text in streamer:
         generate += new_text
-        yield generate
+        print(new_text, end='', flush=True)
 
     if args.debug:
         print("\n", {"prompt": prompt, "outputs": outputs}, "\n")
@@ -79,7 +79,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="facebook/opt-350m")
+    parser.add_argument("--model-path", type=str, default="/kaggle/working/llavamodel")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--query", type=str, default="Hello")
     parser.add_argument("--image-file", type=str, required=True)
