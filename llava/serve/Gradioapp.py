@@ -14,8 +14,9 @@ import requests
 from PIL import Image
 from io import BytesIO
 from transformers import TextStreamer
-
-tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/llavamodel", load_4bit=True)
+model_name = get_model_name_from_path("/kaggle/working/llavamodel")
+#tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto")
+tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/llavamodel", None, model_name, load_4bit=True)
 def load_image(image_file):
     if image_file.startswith('http') or image_file.startswith('https'):
         response = requests.get(image_file)
@@ -29,7 +30,7 @@ def main(args):
     # Model
     disable_torch_init()
 
-    #model_name = get_model_name_from_path(args.model_path)
+    model_name = get_model_name_from_path("/kaggle/working/llavamodel")
     
     if 'llama-2' in model_name.lower():
         conv_mode = "llava_llama_2"
