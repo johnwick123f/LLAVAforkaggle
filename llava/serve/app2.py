@@ -78,4 +78,4 @@ demo = gr.Interface(
     description="cool app for llava demo",
 )
 demo.queue()
-demo.launch()
+demo.launch(debug=True)
