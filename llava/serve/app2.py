@@ -58,13 +58,22 @@ def main(image, query):
     stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
     keywords = [stop_str]
     stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
-    streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-    #streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+    #streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 #_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
     #generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
     with torch.inference_mode():
-        output_ids = model.generate(
-            input_ids,
+        #output_ids = model.generate(
+            #input_ids,
+            #images=image_tensor,
+            #do_sample=True,
+            #temperature=0.2,
+            #max_new_tokens=1024,
+            #streamer=streamer,
+            #use_cache=True,
+            #stopping_criteria=[stopping_criteria])
+        generation_kwargs = dict(
+            input_ids=input_ids,
             images=image_tensor,
             do_sample=True,
             temperature=0.2,
@@ -72,12 +81,17 @@ def main(image, query):
             streamer=streamer,
             use_cache=True,
             stopping_criteria=[stopping_criteria])
-        
-        generated_text = ""
-        for output in output_ids:
-            token = tokenizer.decode(output.item(), skip_special_tokens=True, skip_prompt=True)
-            generated_text += token
-            yield generated_text
+            )
+        thread = Thread(target=model.generate, kwargs=generation_kwargs)
+        thread.start()
+        gen = ""
+        for new_text in streamer:
+            gen += new_text
+            yield gen
+        #for output in output_ids:
+            #token = tokenizer.decode(output.item(), skip_special_tokens=True, skip_prompt=True)
+            #generated_text += token
+            #yield generated_text
 
 demo = gr.Interface(
     main, 
