@@ -14,9 +14,9 @@ import requests
 from PIL import Image
 from io import BytesIO
 from transformers import TextStreamer
-model_name = get_model_name_from_path("mmaaz60/LLaVA-7B-Lightening-v1-1")
+model_name = get_model_name_from_path("/kaggle/working/LLaVA-7B-Lightening-v1-1")
 #tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto")
-tokenizer, model, image_processor, context_len = load_pretrained_model("mmaaz60/LLaVA-7B-Lightening-v1-1", None, model_name, load_4bit=True)
+tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/LLaVA-7B-Lightening-v1-1", None, model_name, load_4bit=True)
 def load_image(image_file):
     if image_file.startswith('http') or image_file.startswith('https'):
         response = requests.get(image_file)
@@ -30,7 +30,7 @@ def main(args):
     # Model
     disable_torch_init()
 
-    model_name = get_model_name_from_path("mmaaz60/LLaVA-7B-Lightening-v1-1")
+    model_name = get_model_name_from_path("/kaggle/working/LLaVA-7B-Lightening-v1-1")
     
     if 'llama-2' in model_name.lower():
         conv_mode = "llava_llama_2"
@@ -87,7 +87,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="mmaaz60/LLaVA-7B-Lightening-v1-1")
+    parser.add_argument("--model-path", type=str, default="/kaggle/working/LLaVA-7B-Lightening-v1-1")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--query", type=str, default="Hello")
     parser.add_argument("--image-file", type=str, required=True)
