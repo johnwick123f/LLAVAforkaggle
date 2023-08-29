@@ -72,7 +72,7 @@ def main(image, query):
         #print(new_text, end="", flush=True)
 demo = gr.Interface(
     main, 
-    inputs=[gr.Image(), "text"], 
+    inputs=[gr.Image(type="filepath"), "text"], 
     outputs="text",
     title="Llava demo",
     description="cool app for llava demo",
