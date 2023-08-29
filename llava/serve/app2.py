@@ -59,12 +59,11 @@ def main(image, query):
     keywords = [stop_str]
     stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
     #streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-#_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
-    #generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
-    #thread = Thread(target=model.generate, kwargs=generation_kwargs)
     streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+#_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
+    generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
     #thread = Thread(target=model.generate(input_ids, images=image_tensor, do_sample=True, temperature=0.2,max_new_tokens=1024, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria]))
-    thread = Thread(target=model.generate, args=(input_ids, image_tensor, True, 0.2, 1024, streamer, True, [stopping_criteria]))
+    thread = Thread(target=model.generate, kwargs=generation_kwargs)
     thread.start()
     generated_text = ""
     for new_text in streamer:
