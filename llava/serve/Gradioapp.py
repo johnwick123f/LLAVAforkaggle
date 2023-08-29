@@ -13,7 +13,7 @@ from PIL import Image
 import requests
 from PIL import Image
 from io import BytesIO
-from transformers import TextStreamer
+#from transformers import TextStreamer
 model_name = get_model_name_from_path("/kaggle/working/LLaVA-7B-Lightening-v1-1")
 #tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto")
 tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/LLaVA-7B-Lightening-v1-1", None, model_name, load_4bit=True)
@@ -63,20 +63,27 @@ def main(args):
     stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
     keywords = [stop_str]
     stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
-    streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+    #streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 #_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
     #generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
     #thread = Thread(target=model.generate, kwargs=generation_kwargs)
-    with torch.inference_mode():
-        _ = model.generate(
-            input_ids,
-            images=image_tensor,
-            do_sample=True,
-            temperature=0.2,
-            max_new_tokens=1024,
-            streamer=streamer,
-            use_cache=True,
-            stopping_criteria=[stopping_criteria])
+    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+    thread = Thread(target=model.generate(input_ids, images=image_tensor, do_sample=True, temperature=0.2,max_new_tokens=1024, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria]))
+    thread.start()
+    generated_text = ""
+    for new_text in streamer:
+        generated_text += new_text
+        print(new_text, end="", flush=True)
+    #with torch.inference_mode():
+        #_ = model.generate(
+            #input_ids,
+            #images=image_tensor,
+            #do_sample=True,
+            #temperature=0.2,
+            #max_new_tokens=1024,
+            #streamer=streamer,
+            #use_cache=True,
+            #stopping_criteria=[stopping_criteria])
 
 
 
