@@ -13,7 +13,7 @@ from PIL import Image
 import requests
 from PIL import Image
 from io import BytesIO
-#from transformers import TextStreamer
+from transformers import TextStreamer
 model_name = get_model_name_from_path("/kaggle/working/LLaVA-7B-Lightening-v1-1")
 #tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto")
 tokenizer, model, image_processor, context_len = load_pretrained_model("/kaggle/working/LLaVA-7B-Lightening-v1-1", None, model_name, load_4bit=True)
