@@ -72,10 +72,13 @@ def main(image, query):
             streamer=streamer,
             use_cache=True,
             stopping_criteria=[stopping_criteria])
-        new = ""
-        outputs = tokenizer.decode(output_ids[0, input_ids.shape[1]:]).strip()
-        new += outputs
-        yield new
+        
+        generated_text = ""
+        for output in output_ids[0]:
+            token = tokenizer.decode(output.item(), skip_special_tokens=True)
+            generated_text += token
+            yield generated_text
+
 demo = gr.Interface(
     main, 
     inputs=[gr.Image(type="filepath"), "text"], 
