@@ -78,11 +78,6 @@ def main(args):
             use_cache=True,
             stopping_criteria=[stopping_criteria])
 
-         
-
-    if args.debug:
-        print("\n", {"prompt": prompt, "outputs": outputs}, "\n")
-
 
 
 if __name__ == "__main__":
