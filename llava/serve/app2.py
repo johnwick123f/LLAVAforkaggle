@@ -74,8 +74,8 @@ def main(image, query):
             stopping_criteria=[stopping_criteria])
         
         generated_text = ""
-        for output in output_ids[0]:
-            token = tokenizer.decode(output.item(), skip_special_tokens=True)
+        for output in output_ids:
+            token = tokenizer.decode(output.item(), skip_special_tokens=True, skip_prompt=True)
             generated_text += token
             yield generated_text
 
