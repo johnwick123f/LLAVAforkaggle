@@ -61,7 +61,21 @@ def main(image, query):
     #streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
     streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 #_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
-    generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
+    #generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
+    generation_kwargs = {
+    "input_ids": input_ids,
+    "images": image_tensor,
+    "max_new_tokens": 200,
+    "temperature": 0.1,
+    "top_k": 20,
+    "top_p": 0.4,
+    "do_sample": True,
+    "repetition_penalty": 1.2,
+    "streamer": streamer,
+    "use_cache": True,
+    "stopping_criteria": [stopping_criteria]
+    }
+
     #thread = Thread(target=model.generate(input_ids, images=image_tensor, do_sample=True, temperature=0.2,max_new_tokens=1024, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria]))
     thread = Thread(target=model.generate, kwargs=generation_kwargs)
     thread.start()
