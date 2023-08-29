@@ -62,28 +62,20 @@ def main(image, query):
     streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 #_ = model.generate(**inputs, streamer=streamer, max_new_tokens=20)
     #generation_kwargs = dict(input_ids, images=image_tensor, max_new_tokens=200, temperature=0.1, top_k=20, top_p=0.4, do_sample=True, repetition_penalty=1.2, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria])
-    generation_kwargs = {
-    "input_ids": input_ids,
-    "images": image_tensor,
-    "max_new_tokens": 200,
-    "temperature": 0.1,
-    "top_k": 20,
-    "top_p": 0.4,
-    "do_sample": True,
-    "repetition_penalty": 1.2,
-    "streamer": streamer,
-    "use_cache": True,
-    "stopping_criteria": [stopping_criteria]
-    }
-
-    #thread = Thread(target=model.generate(input_ids, images=image_tensor, do_sample=True, temperature=0.2,max_new_tokens=1024, streamer=streamer, use_cache=True, stopping_criteria=[stopping_criteria]))
-    thread = Thread(target=model.generate, kwargs=generation_kwargs)
-    thread.start()
-    generated_text = ""
-    for new_text in streamer:
-        generated_text += new_text
-        yield generated_text
-        #print(new_text, end="", flush=True)
+    with torch.inference_mode():
+        output_ids = model.generate(
+            input_ids,
+            images=image_tensor,
+            do_sample=True,
+            temperature=0.2,
+            max_new_tokens=1024,
+            streamer=streamer,
+            use_cache=True,
+            stopping_criteria=[stopping_criteria])
+        new = ""
+        outputs = tokenizer.decode(output_ids[0, input_ids.shape[1]:]).strip()
+        new += outputs
+        yield new
 demo = gr.Interface(
     main, 
     inputs=[gr.Image(type="filepath"), "text"], 
