@@ -80,7 +80,7 @@ def main(image, query):
             max_new_tokens=1024,
             streamer=streamer,
             use_cache=True,
-            stopping_criteria=[stopping_criteria])
+            stopping_criteria=[stopping_criteria]
             )
         thread = Thread(target=model.generate, kwargs=generation_kwargs)
         thread.start()
