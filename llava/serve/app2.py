@@ -31,15 +31,7 @@ def main(image, query):
     disable_torch_init()
 
     model_name = get_model_name_from_path("/kaggle/input/llamanotebook/llava-llama-2-7B-merged/")
-    
-    if 'llama-2' in model_name.lower():
-        conv_mode = "llava_llama_2"
-    elif "v1" in model_name.lower():
-        conv_mode = "llava_v1"
-    elif "mpt" in model_name.lower():
-        conv_mode = "mpt"
-    else:
-        conv_mode = "llava_v0"
+    conv_mode = "llava_v1"
         
     conv = conv_templates[conv_mode].copy()
     if "mpt" in model_name.lower():
@@ -76,11 +68,14 @@ def main(image, query):
             input_ids=input_ids,
             images=image_tensor,
             do_sample=True,
-            temperature=0.2,
+            temperature=0.7,
             max_new_tokens=1024,
             streamer=streamer,
             use_cache=True,
-            stopping_criteria=[stopping_criteria]
+            stopping_criteria=[stopping_criteria],
+            top_k = 30,
+            top_p = 0.5,
+            repetition_penalty=1.2,
             )
         thread = Thread(target=model.generate, kwargs=generation_kwargs)
         thread.start()
